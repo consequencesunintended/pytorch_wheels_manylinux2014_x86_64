@@ -48,10 +48,11 @@ jobs:
         run: |
           cd ~/github/requests  # Ensure you are in the correct directory
           python setup.py bdist_wheel
-      - name: Find and Copy Wheels
+      - name: Find Wheel Files
         run: |
-          mkdir -p $GITHUB_WORKSPACE/artifacts
-          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts \;
+          echo "Searching for wheel files in ~/github..."
+          find ~/github -name '*.whl'
+
       - name: Find and Copy Wheels
         run: |
           mkdir -p $GITHUB_WORKSPACE/artifacts
