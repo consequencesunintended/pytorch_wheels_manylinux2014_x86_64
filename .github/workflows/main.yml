@@ -8,6 +8,18 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.11', '3.10', '3.9', '3.8', '3.7']
+        python-version-dash: ['3-11', '3-10', '3-9', '3-8', '3-7']
+        include:
+          - python-version: '3.11'
+            python-version-dash: '3-11'
+          - python-version: '3.10'
+            python-version-dash: '3-10'
+          - python-version: '3.9'
+            python-version-dash: '3-9'
+          - python-version: '3.8'
+            python-version-dash: '3-8'
+          - python-version: '3.7'
+            python-version-dash: '3-7'
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
       - uses: actions/checkout@v2
@@ -47,19 +59,21 @@ jobs:
       - name: Build wheel
         run: |
           cd ~/github/requests  # Ensure you are in the correct directory
-          python setup.py bdist_wheel
+          python setup.py bdist_wheel 
       - name: Find Wheel Files
         run: |
           echo "Searching for wheel files in ~/github..."
           find ~/github -name '*.whl'
-          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts \;
+          mkdir -p $GITHUB_WORKSPACE/artifacts-${{ matrix.python-version-dash }}
+          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts-${{ matrix.python-version-dash }} \;
+          ls $GITHUB_WORKSPACE/artifacts-${{ matrix.python-version-dash }}
       
       - name: Upload wheels to Artifacts
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: $GITHUB_WORKSPACE/artifacts/*.whl
+          path: $GITHUB_WORKSPACE/artifacts-${{ matrix.python-version-dash }}/*.whl
 
 
           
