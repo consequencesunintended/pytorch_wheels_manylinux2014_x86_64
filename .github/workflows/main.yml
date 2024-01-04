@@ -46,15 +46,15 @@ jobs:
           export MAX_JOBS=2
       - name: Build wheel
         run: |
-          cd ~/github/pytorch  # Ensure you are in the correct directory
+          cd ~/github/requests  # Ensure you are in the correct directory
           python setup.py bdist_wheel
       - name: Find and Copy Wheels
         run: |
           mkdir -p $GITHUB_WORKSPACE/artifacts
-          if compgen -G "$GITHUB_WORKSPACE/github/pytorch/dist/*.whl" > /dev/null; then
-            cp $GITHUB_WORKSPACE/github/pytorch/dist/*.whl $GITHUB_WORKSPACE/artifacts/
-          elif compgen -G "$HOME/github/pytorch/dist/*.whl" > /dev/null; then
-            cp $HOME/github/pytorch/dist/*.whl $GITHUB_WORKSPACE/artifacts/
+          if compgen -G "$GITHUB_WORKSPACE/github/requests/dist/*.whl" > /dev/null; then
+            cp $GITHUB_WORKSPACE/github/requests/dist/*.whl $GITHUB_WORKSPACE/artifacts/
+          elif compgen -G "$HOME/github/requests/dist/*.whl" > /dev/null; then
+            cp $HOME/github/requests/dist/*.whl $GITHUB_WORKSPACE/artifacts/
           else
             echo "No wheel files found."
           fi
