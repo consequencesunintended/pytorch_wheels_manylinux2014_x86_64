@@ -51,6 +51,10 @@ jobs:
       - name: Find and Copy Wheels
         run: |
           mkdir -p $GITHUB_WORKSPACE/artifacts
+          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts \;
+      - name: Find and Copy Wheels
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/artifacts
           if compgen -G "$GITHUB_WORKSPACE/github/requests/dist/*.whl" > /dev/null; then
             cp $GITHUB_WORKSPACE/github/requests/dist/*.whl $GITHUB_WORKSPACE/artifacts/
           elif compgen -G "$HOME/github/requests/dist/*.whl" > /dev/null; then
