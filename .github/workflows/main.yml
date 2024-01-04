@@ -77,7 +77,225 @@ jobs:
       #   with:
       #     name: wheels
       #     path: ${{ env.ARTIFACTS_DIR }}/*.whl
+name: Build and Package Workflow
 
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - main
+
+env:
+  GLFW_VERSION: "3.3.9"
+  CUDA_VERSION_11_8: "11-8"
+  ARCH: "x86_64"
+  
+jobs:
+  # build-windows:
+  #   runs-on: windows-latest
+  #   steps:
+  #   - uses: actions/checkout@v2
+
+  #   - name: List Visual Studio installations
+  #     run: |
+  #       & "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -products * -legacy -format text
+
+  #   - name: Install Wheel
+  #     run:
+  #       pip3 install setuptools wheel
+        
+  #   - name: Install Torch + Cuda 11-8
+  #     run:
+  #       pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+ 
+  #   - name: Download and Extract CUDA Toolkit
+  #     run: |
+  #       choco install cuda --version=11.8.0.52206
+
+  #   - name: Install dependencies and build GLFW for Windows
+  #     run: |
+  #       if ("${{env.GLFW_VERSION}}" -eq "") {
+  #         throw "GLFW_VERSION is not set"
+  #       }
+  #       choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+  #       choco install unzip
+  #       choco install curl
+  #       curl -LO https://github.com/glfw/glfw/releases/download/${{env.GLFW_VERSION}}/glfw-${{env.GLFW_VERSION}}.zip
+  #       unzip glfw-${{env.GLFW_VERSION}}.zip
+  #       mkdir build
+  #       cd build
+  #       cmake -G "Visual Studio 17 2022" -A x64 ../glfw-${{env.GLFW_VERSION}} -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
+  #       cmake --build . --config Release
+  #       mkdir -p ../artifacts-windows-x86_64/
+  #       cp src/Release/glfw3.dll ../artifacts-windows-x86_64/glfw3.dll
+  #       cd ..
+
+  #   - name: Find CUDA Toolkit path
+  #     run: |
+  #       $env:CUDART_PATH= "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin"
+  #       $env:CUDART_HOME= "C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\v11.8\bin"
+
+
+  #   - name: Generate Wheels
+  #     run: |
+  #       python3 setup.py bdist_wheel --python-tag py2.py27.py3.py30.py31.py32.py33.py34.py35.py36.py37.py38 --plat-name win_amd64
+  #       cp dist/* artifacts-windows-x86_64/
+    
+  #   - name: Upload build artifacts
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: whl-win-x86-64
+  #       path: artifacts-windows-x86_64/
+
+  build-linux:
+    runs-on: ubuntu-latest
+    container: quay.io/pypa/manylinux2014_x86_64
+    steps:
+      - uses: actions/checkout@v2    
+      - name: Install wget
+        run: yum install -y wget      
+      - name: Install Anaconda
+        run: |
+          wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
+          bash Anaconda3-2022.10-Linux-x86_64.sh -b -p $HOME/anaconda3
+          echo "$HOME/anaconda3/bin" >> $GITHUB_PATH
+      
+      - name: Create Conda environment
+        run: |
+          source $HOME/anaconda3/etc/profile.d/conda.sh
+          conda create -p ~/install/acond10 python=3.10 -y
+          source $HOME/anaconda3/etc/profile.d/conda.sh
+          conda activate ~/install/acond10
+          conda install -y astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses
+          conda install -y mkl mkl-include
+          conda install -c pytorch magma-cuda118
+      - name: Install torch
+        run: |
+          mkdir ~/github
+          cd ~/github
+          git clone --recursive https://github.com/pytorch/pytorch
+          cd pytorch
+          # python tools/amd_build/build_amd.py
+          export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+          export CUDA_VERSION=11.8
+          export CUDACXX=/usr/local/cuda-${CUDA_VERSION}/bin/nvcc
+          export USE_ITT=0
+          export USE_KINETO=0
+          export BUILD_TEST=0
+          export USE_MPI=0
+          export BUILD_CAFFE2=0
+          export BUILD_CAFFE2_OPS=0
+          export USE_DISTRIBUTED=0
+          export MAX_JOBS=2
+          python setup.py build
+          cd ..
+          cd .. 
+          
+      - name: Install dependencies and build GLFW for X11 and Wayland
+        run: |
+          curl -LO https://github.com/glfw/glfw/releases/download/${GLFW_VERSION}/glfw-${GLFW_VERSION}.zip
+          unzip glfw-${GLFW_VERSION}.zip
+          curl -LO https://github.com/Kitware/CMake/releases/download/v3.1.3/cmake-3.1.3-Linux-x86_64.tar.gz
+          tar xzf cmake-3.1.3-Linux-x86_64.tar.gz
+          mv cmake-3.1.3-Linux-x86_64 cmake
+          yum install -y libXinerama-devel libXrandr-devel libXcursor-devel libXi-devel extra-cmake-modules libwayland-client-devel libxkbcommon-devel
+          curl -LO https://wayland.freedesktop.org/releases/wayland-protocols-1.17.tar.xz
+          tar xf wayland-protocols-1.17.tar.xz
+          cd wayland-protocols-1.17
+          ./configure
+          make install
+          cd ..
+          mkdir build_x11
+          cd build_x11
+          ../cmake/bin/cmake ../glfw-${GLFW_VERSION} -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF
+          make
+          mkdir -p ../artifacts-manylinux2014-x86_64/x11
+          cp src/libglfw.so ../artifacts-manylinux2014-x86_64/x11/libglfw.so
+          cd ..
+          mkdir build_wayland
+          cd build_wayland
+          PKG_CONFIG_PATH=/usr/local/share/pkgconfig ../cmake/bin/cmake ../glfw-${GLFW_VERSION} -DBUILD_SHARED_LIBS=ON -DGLFW_BUILD_EXAMPLES=OFF -DGLFW_BUILD_TESTS=OFF -DGLFW_BUILD_DOCS=OFF -DGLFW_USE_WAYLAND=ON
+          make
+          mkdir -p ../artifacts-manylinux2014-x86_64/wayland
+          cp src/libglfw.so ../artifacts-manylinux2014-x86_64/wayland/libglfw.so
+          cd ..
+          yum install -y yum-utils
+          yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
+          yum clean all
+          yum -y install cuda-compiler-${CUDA_VERSION_11_8}.${ARCH} cuda-libraries-${CUDA_VERSION_11_8}.${ARCH} cuda-libraries-devel-${CUDA_VERSION_11_8}.${ARCH}
+          export PATH="/usr/local/cuda/bin:${PATH}"
+          export CUDA_HOME=/usr/local/cuda
+          export CUDA_ROOT=/usr/local/cuda
+          export CUDA_PATH=/usr/local/cuda
+          export CUDADIR=/usr/local/cuda
+          export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
+
+      - name: Package
+        run: |
+          mkdir glfw/x11/
+          cp artifacts-manylinux2014-x86_64/x11/libglfw.so glfw/x11/libglfw.so
+          mkdir glfw/wayland/
+          cp artifacts-manylinux2014-x86_64/wayland/libglfw.so glfw/wayland/libglfw.so
+          python3 setup.py bdist_wheel --python-tag py2.py27.py3.py30.py31.py32.py33.py34.py35.py36.py37.py38
+          rm -rf glfw/x11/libglfw.so glfw/wayland/libglfw.so build
+          cp dist/* artifacts-windows-x86_64/
+      
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: whl-win-x86-64
+          path: artifacts-windows-x86_64/
+
+  # package:
+  #   needs: build-linux
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - name: Download build artifacts
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: whl-linux-x86-64
+  #         path: artifacts-manylinux2014-x86_64
+  #     - name: Package
+  #       run: |
+  #         sudo apt-get update -qy
+  #         sudo apt-get install -y curl python3-setuptools python3-wheel unzip
+  #         pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+  #         mkdir glfw/x11/
+  #         cp artifacts-manylinux2014-x86_64/x11/libglfw.so glfw/x11/libglfw.so
+  #         mkdir glfw/wayland/
+  #         cp artifacts-manylinux2014-x86_64/wayland/libglfw.so glfw/wayland/libglfw.so
+  #         python3 setup.py bdist_wheel --python-tag py2.py27.py3.py30.py31.py32.py33.py34.py35.py36.py37.py38 --plat-name manylinux2014_x86_64
+  #         rm -rf glfw/x11/libglfw.so glfw/wayland/libglfw.so build
+  #         cp dist/* ../../dist
+  #         cd ../..
+  #     - name: Upload distribution artifacts
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: dist
+  #         path: dist/
+  # release:
+  #   needs: package
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v2
+  
+  #     - name: Download distribution artifacts
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: dist
+  #         path: dist
+          
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gh
+          
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
