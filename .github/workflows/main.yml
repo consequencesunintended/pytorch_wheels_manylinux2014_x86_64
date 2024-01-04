@@ -11,6 +11,12 @@ jobs:
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
       - uses: actions/checkout@v2
+
+      - name: Install GitHub CLI
+        run: |
+          yum apt-get update
+          yum apt-get install -y gh
+          
       - name: Install wget
         run: yum install -y wget
       - name: Set Python-Version-Dash
