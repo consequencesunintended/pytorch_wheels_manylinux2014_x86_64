@@ -31,8 +31,8 @@ jobs:
         run: |
           mkdir ~/github
           cd ~/github
-          git clone --recursive https://github.com/pytorch/pytorch
-          cd pytorch
+          git clone --recursive https://github.com/psf/requests
+          cd requests
           export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
           export CUDA_VERSION=11.8
           export CUDACXX=/usr/local/cuda-${CUDA_VERSION}/bin/nvcc
