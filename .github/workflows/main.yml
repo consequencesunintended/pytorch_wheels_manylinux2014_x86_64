@@ -1,0 +1,54 @@
+name: Build Wheels
+
+on: [push, pull_request]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.11', '3.10', '3.9', '3.8', '3.7']
+    container: quay.io/pypa/manylinux2014_x86_64
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install wget
+        run: yum install -y wget
+      - name: Install Anaconda
+        run: |
+          wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
+          bash Anaconda3-2022.10-Linux-x86_64.sh -b -p $HOME/anaconda3
+          echo "$HOME/anaconda3/bin" >> $GITHUB_PATH
+      - name: Create Conda environment
+        run: |
+          source $HOME/anaconda3/etc/profile.d/conda.sh
+          conda create -p ~/install/acond10 python=${{ matrix.python-version }} -y
+          source $HOME/anaconda3/etc/profile.d/conda.sh
+          conda activate ~/install/acond10
+          conda install -y astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses
+          conda install -y mkl mkl-include
+          conda install -c pytorch magma-cuda118
+      - name: Install torch
+        run: |
+          mkdir ~/github
+          cd ~/github
+          git clone --recursive https://github.com/pytorch/pytorch
+          cd pytorch
+          export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+          export CUDA_VERSION=11.8
+          export CUDACXX=/usr/local/cuda-${CUDA_VERSION}/bin/nvcc
+          export USE_ITT=0
+          export USE_KINETO=0
+          export BUILD_TEST=0
+          export USE_MPI=0
+          export BUILD_CAFFE2=0
+          export BUILD_CAFFE2_OPS=0
+          export USE_DISTRIBUTED=0
+          export MAX_JOBS=2
+      - name: Build wheel
+        run: |
+          python setup.py bdist_wheel
+      - name: Upload wheels to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: ./dist/*.whl
