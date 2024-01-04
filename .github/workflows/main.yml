@@ -66,14 +66,15 @@ jobs:
           echo "Files in artifacts directory:"
           ls -l ../artifacts-$PYTHON_VERSION_DASH
           echo "Full path of artifacts directory:"
-          realpath ../artifacts-$PYTHON_VERSION_DASH
+          ARTIFACTS_DIR=$(realpath ../artifacts-$PYTHON_VERSION_DASH)
+          echo "ARTIFACTS_DIR=$ARTIFACTS_DIR" >> $GITHUB_ENV
       
       - name: Upload wheels to Artifacts
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: ../artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
+          path: ${{ env.ARTIFACTS_DIR }}/*.whl
 
 
 
