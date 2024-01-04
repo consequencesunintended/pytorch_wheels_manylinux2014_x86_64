@@ -72,7 +72,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH/*.whl
+          path: ${{ env.GITHUB_WORKSPACE }}/artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
 
 
 
