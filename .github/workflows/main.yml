@@ -33,17 +33,17 @@ jobs:
           cd ~/github
           git clone --recursive https://github.com/psf/requests
           cd requests
-          export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
-          export CUDA_VERSION=11.8
-          export CUDACXX=/usr/local/cuda-${CUDA_VERSION}/bin/nvcc
-          export USE_ITT=0
-          export USE_KINETO=0
-          export BUILD_TEST=0
-          export USE_MPI=0
-          export BUILD_CAFFE2=0
-          export BUILD_CAFFE2_OPS=0
-          export USE_DISTRIBUTED=0
-          export MAX_JOBS=2
+          # export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+          # export CUDA_VERSION=11.8
+          # export CUDACXX=/usr/local/cuda-${CUDA_VERSION}/bin/nvcc
+          # export USE_ITT=0
+          # export USE_KINETO=0
+          # export BUILD_TEST=0
+          # export USE_MPI=0
+          # export BUILD_CAFFE2=0
+          # export BUILD_CAFFE2_OPS=0
+          # export USE_DISTRIBUTED=0
+          # export MAX_JOBS=2
       - name: Build wheel
         run: |
           cd ~/github/requests  # Ensure you are in the correct directory
