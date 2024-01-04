@@ -46,6 +46,7 @@ jobs:
           export MAX_JOBS=2
       - name: Build wheel
         run: |
+          cd ~/github/pytorch  # Ensure you are in the correct directory
           python setup.py bdist_wheel
       - name: Upload wheels to Artifacts
         uses: actions/upload-artifact@v2
