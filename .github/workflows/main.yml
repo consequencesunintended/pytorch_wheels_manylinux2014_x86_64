@@ -52,4 +52,5 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: ./dist/*.whl
+          path: ${{ github.workspace }}/github/pytorch/dist/*.whl
+
