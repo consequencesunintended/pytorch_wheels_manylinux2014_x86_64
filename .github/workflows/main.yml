@@ -55,24 +55,25 @@ jobs:
         run: |
           cd ~/github/requests  # Ensure you are in the correct directory
           python setup.py bdist_wheel 
+          cd ..
       - name: Find Wheel Files
         run: |
           echo "PYTHON_VERSION_DASH: $PYTHON_VERSION_DASH"
           echo "Searching for wheel files in ~/github..."
           find ~/github -name '*.whl'
-          mkdir -p $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
-          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH \;
+          mkdir -p ../artifacts-$PYTHON_VERSION_DASH
+          find ~/github -name '*.whl' -exec cp {} ../artifacts-$PYTHON_VERSION_DASH \;
           echo "Files in artifacts directory:"
-          ls -l $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
+          ls -l ../artifacts-$PYTHON_VERSION_DASH
           echo "Full path of artifacts directory:"
-          realpath $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
+          realpath ../artifacts-$PYTHON_VERSION_DASH
       
       - name: Upload wheels to Artifacts
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: ${{ env.GITHUB_WORKSPACE }}/artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
+          path: artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
 
 
 
