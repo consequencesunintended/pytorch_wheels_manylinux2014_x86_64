@@ -73,7 +73,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
+          path: ../artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
 
 
 
