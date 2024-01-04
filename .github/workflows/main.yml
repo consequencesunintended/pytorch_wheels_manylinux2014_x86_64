@@ -57,11 +57,15 @@ jobs:
           python setup.py bdist_wheel 
       - name: Find Wheel Files
         run: |
+          echo "PYTHON_VERSION_DASH: $PYTHON_VERSION_DASH"
           echo "Searching for wheel files in ~/github..."
           find ~/github -name '*.whl'
           mkdir -p $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
           find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH \;
-          ls $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
+          echo "Files in artifacts directory:"
+          ls -l $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
+          echo "Full path of artifacts directory:"
+          realpath $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
       
       - name: Upload wheels to Artifacts
         if: always()
@@ -69,6 +73,7 @@ jobs:
         with:
           name: wheels
           path: $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH/*.whl
+
 
 
           
