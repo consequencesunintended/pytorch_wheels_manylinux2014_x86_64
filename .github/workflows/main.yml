@@ -14,8 +14,8 @@ jobs:
 
       - name: Install GitHub CLI
         run: |
-          yum apt-get update
-          yum apt-get install -y gh
+          yum update -y
+          yum install -y gh
           
       - name: Install wget
         run: yum install -y wget
