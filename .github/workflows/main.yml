@@ -48,9 +48,24 @@ jobs:
         run: |
           cd ~/github/pytorch  # Ensure you are in the correct directory
           python setup.py bdist_wheel
+      - name: Find and Copy Wheels
+        run: |
+          mkdir -p $GITHUB_WORKSPACE/artifacts
+          if compgen -G "$GITHUB_WORKSPACE/github/pytorch/dist/*.whl" > /dev/null; then
+            cp $GITHUB_WORKSPACE/github/pytorch/dist/*.whl $GITHUB_WORKSPACE/artifacts/
+          elif compgen -G "$HOME/github/pytorch/dist/*.whl" > /dev/null; then
+            cp $HOME/github/pytorch/dist/*.whl $GITHUB_WORKSPACE/artifacts/
+          else
+            echo "No wheel files found."
+          fi
+      
       - name: Upload wheels to Artifacts
+        if: always()
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: ${{ github.workspace }}/github/pytorch/dist/*.whl
+          path: $GITHUB_WORKSPACE/artifacts/*.whl
+
+
+          
 
