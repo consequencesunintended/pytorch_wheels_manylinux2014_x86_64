@@ -52,17 +52,7 @@ jobs:
         run: |
           echo "Searching for wheel files in ~/github..."
           find ~/github -name '*.whl'
-
-      - name: Find and Copy Wheels
-        run: |
-          mkdir -p $GITHUB_WORKSPACE/artifacts
-          if compgen -G "$GITHUB_WORKSPACE/github/requests/dist/*.whl" > /dev/null; then
-            cp $GITHUB_WORKSPACE/github/requests/dist/*.whl $GITHUB_WORKSPACE/artifacts/
-          elif compgen -G "$HOME/github/requests/dist/*.whl" > /dev/null; then
-            cp $HOME/github/requests/dist/*.whl $GITHUB_WORKSPACE/artifacts/
-          else
-            echo "No wheel files found."
-          fi
+          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts \;
       
       - name: Upload wheels to Artifacts
         if: always()
