@@ -16,7 +16,10 @@ jobs:
       - name: Set Python-Version-Dash
         run: |
           echo "PYTHON_VERSION_DASH=$(echo '${{ matrix.python-version }}' | tr '.' '-')" >> $GITHUB_ENV
-          echo ${{ env.PYTHON_VERSION_DASH }}
+      
+      - name: Print Python-Version-Dash
+        run: echo "this $PYTHON_VERSION_DASH"
+
       - name: Install Anaconda
         run: |
           wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
