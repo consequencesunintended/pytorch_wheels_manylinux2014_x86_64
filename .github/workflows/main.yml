@@ -59,16 +59,16 @@ jobs:
         run: |
           echo "Searching for wheel files in ~/github..."
           find ~/github -name '*.whl'
-          mkdir -p $GITHUB_WORKSPACE/artifacts-${{ env.PYTHON_VERSION_DASH }}
-          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts-${{ env.PYTHON_VERSION_DASH }} \;
-          ls $GITHUB_WORKSPACE/artifacts-${{ matrix.python-version-dash }}
+          mkdir -p $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
+          find ~/github -name '*.whl' -exec cp {} $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH \;
+          ls $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH
       
       - name: Upload wheels to Artifacts
         if: always()
         uses: actions/upload-artifact@v2
         with:
           name: wheels
-          path: $GITHUB_WORKSPACE/artifacts-${{ env.PYTHON_VERSION_DASH }}/*.whl
+          path: $GITHUB_WORKSPACE/artifacts-$PYTHON_VERSION_DASH/*.whl
 
 
           
