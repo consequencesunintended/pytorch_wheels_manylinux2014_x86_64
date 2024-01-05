@@ -58,7 +58,7 @@ jobs:
 
       - name: Whic Python
         run: |
-          which python
+          python --version
 
       - name: Install torch
         run: |
