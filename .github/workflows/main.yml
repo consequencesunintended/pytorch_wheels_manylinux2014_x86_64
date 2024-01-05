@@ -19,6 +19,18 @@ jobs:
       - name: Install GitHub CLI
         run: |
           yum install -y gh
+
+      - name: Create Release
+        if: matrix.python-version == '3.9'
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.YOUR_PAT_SECRET }}
+        with:
+          tag_name: 'test'
+          release_name: 'this is a test'
+          draft: false
+          prerelease: false
          
       - name: Install wget
         run: yum install -y wget
@@ -79,27 +91,6 @@ jobs:
           echo "Full path of artifacts directory:"
           ARTIFACTS_DIR=$(realpath ../artifacts-$PYTHON_VERSION_DASH)
           echo "ARTIFACTS_DIR=$ARTIFACTS_DIR" >> $GITHUB_ENV
-
-      - name: Check if Tag Exists
-        id: check_tag
-        run: |
-          if gh release view 'test' --repo ${{ github.repository }}; then
-            echo "TAG_EXISTS=true" >> $GITHUB_ENV
-          else
-            echo "TAG_EXISTS=false" >> $GITHUB_ENV
-          fi
-      
-      - name: Create Release
-        if: env.TAG_EXISTS == 'false'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.YOUR_PAT_SECRET }}
-        with:
-          tag_name: 'test'
-          release_name: 'this is a test'
-          draft: false
-          prerelease: false
   
       - name: Upload assets
         run: |
