@@ -73,13 +73,9 @@ jobs:
           export CUDADIR=/usr/local/cuda
           export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
           export CMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
+          export CUDNN_LIBRARY_PATH=/usr/local/cuda/lib64/ 
+          export CUDNN_INCLUDE_DIR=/usr/local/cuda/include/
 
-      - name: nvcc installation
-        run: |
-          ls /usr/local/cuda/bin
-          /usr/local/cuda/bin/nvcc --version
-          ls /usr/local/cuda-11/bin
-          ls /usr/local/cuda-11.7/bin
 
       - name: Install torch
         run: |
