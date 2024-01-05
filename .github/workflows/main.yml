@@ -57,9 +57,21 @@ jobs:
           conda install -y mkl mkl-include
           conda install -c pytorch magma-cuda118
 
-      - name: Whic Python
+      - name: Which Python
         run: |
           ~/install/acond10/bin/python --version
+
+      - name: Install Cuda
+        run: |
+          yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
+          yum clean all
+          yum -y install cuda-compiler-11-8.x86_64 cuda-libraries-11-8.${ARCH} cuda-libraries-devel-11-8.x86_64
+          export PATH="/usr/local/cuda/bin:${PATH}"
+          export CUDA_HOME=/usr/local/cuda
+          export CUDA_ROOT=/usr/local/cuda
+          export CUDA_PATH=/usr/local/cuda
+          export CUDADIR=/usr/local/cuda
+          export LD_LIBRARY_PATH="/usr/local/cuda/lib64:${LD_LIBRARY_PATH}"
 
       - name: Install torch
         run: |
@@ -81,7 +93,7 @@ jobs:
       - name: Build wheel
         run: |
           cd ~/github/pytorch  # Ensure you are in the correct directory
-          python setup.py bdist_wheel 
+          ~/install/acond10/bin/python setup.py bdist_wheel 
           cd ..
       - name: Find Wheel Files
         run: |
