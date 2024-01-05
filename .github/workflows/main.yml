@@ -59,7 +59,7 @@ jobs:
 
       - name: Whic Python
         run: |
-          python --version
+          ~/install/acond10/bin/python --version
 
       - name: Install torch
         run: |
