@@ -90,6 +90,7 @@ jobs:
           export BUILD_CAFFE2_OPS=0
           export USE_DISTRIBUTED=0
           export MAX_JOBS=2
+          export TORCH_CUDA_ARCH_LIST="6.1;7.5;8.0;8.6"
       - name: Build wheel
         run: |
           cd ~/github/pytorch  # Ensure you are in the correct directory
