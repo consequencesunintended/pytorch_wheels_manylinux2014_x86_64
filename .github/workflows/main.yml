@@ -79,16 +79,8 @@ jobs:
 
       - name: Install torch
         run: |
-          mkdir ~/github
-          cd ~/github
-          git clone --recursive https://github.com/pytorch/pytorch
-          cd pytorch
-          bash manywheel/build_cuda.sh
-      # - name: Build wheel
-      #   run: |
-      #     cd ~/github/pytorch  # Ensure you are in the correct directory
-      #     ~/install/acond10/bin/python setup.py bdist_wheel 
-      #     cd ..
+          git clone https://github.com/pytorch/builder
+          bash builder/manywheel/build_wheel.sh py38 manylinux2014_x86_64 cuda11.8 cuda11.8_dist
       - name: Find Wheel Files
         run: |
           echo "PYTHON_VERSION_DASH: $PYTHON_VERSION_DASH"
