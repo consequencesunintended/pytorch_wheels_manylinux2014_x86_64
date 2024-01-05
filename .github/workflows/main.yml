@@ -79,15 +79,18 @@ jobs:
           echo "Full path of artifacts directory:"
           ARTIFACTS_DIR=$(realpath ../artifacts-$PYTHON_VERSION_DASH)
           echo "ARTIFACTS_DIR=$ARTIFACTS_DIR" >> $GITHUB_ENV
-      
-      # - name: Upload wheels to Artifacts
-      #   if: always()
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: wheels
-      #     path: ${{ env.ARTIFACTS_DIR }}/*.whl
 
+      - name: Check if Tag Exists
+        id: check_tag
+        run: |
+          if gh release view 'test' --repo ${{ github.repository }}; then
+            echo "TAG_EXISTS=true" >> $GITHUB_ENV
+          else
+            echo "TAG_EXISTS=false" >> $GITHUB_ENV
+          fi
+      
       - name: Create Release
+        if: env.TAG_EXISTS == 'false'
         id: create_release
         uses: actions/create-release@v1
         env:
