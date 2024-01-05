@@ -1,47 +1,38 @@
 name: Build Wheels
-
 on: [push, pull_request]
-
-
 jobs:
   build-linux:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ['3.11', '3.10', '3.9', '3.8', '3.7']
     container: quay.io/pypa/manylinux2014_x86_64
     steps:
       - uses: actions/checkout@v2
-
-      - name: Add GitHub CLI repository
-        run: |
-          yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+      # - name: Add GitHub CLI repository
+      #   run: |
+      #     yum-config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
       
-      - name: Install GitHub CLI
-        run: |
-          yum install -y gh
-
-      - name: Create Release
-        if: matrix.python-version == '3.9'
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.YOUR_PAT_SECRET }}
-        with:
-          tag_name: 'secondattempt'
-          release_name: 'this is a test'
-          draft: false
-          prerelease: false
+      # - name: Install GitHub CLI
+      #   run: |
+      #     yum install -y gh
+      # - name: Create Release
+      #   if: matrix.python-version == '3.9'
+      #   id: create_release
+      #   uses: actions/create-release@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.YOUR_PAT_SECRET }}
+      #   with:
+      #     tag_name: 'secondattempt'
+      #     release_name: 'this is a test'
+      #     draft: false
+      #     prerelease: false
          
-      - name: Install wget
-        run: yum install -y wget
-      - name: Set Python-Version-Dash
-        run: |
-          echo "PYTHON_VERSION_DASH=$(echo '${{ matrix.python-version }}' | tr '.' '-')" >> $GITHUB_ENV
+      # - name: Install wget
+      #   run: yum install -y wget
+      # - name: Set Python-Version-Dash
+      #   run: |
+      #     echo "PYTHON_VERSION_DASH=$(echo '${{ matrix.python-version }}' | tr '.' '-')" >> $GITHUB_ENV
       
-      - name: Print Python-Version-Dash
-        run: echo "this $PYTHON_VERSION_DASH"
-
+      # - name: Print Python-Version-Dash
+      #   run: echo "this $PYTHON_VERSION_DASH"
       # - name: Install Anaconda
       #   run: |
       #     wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
@@ -56,11 +47,9 @@ jobs:
       #     conda install -y astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses
       #     conda install -y mkl mkl-include
       #     conda install -c pytorch magma-cuda118
-
       # - name: Which Python
       #   run: |
       #     ~/install/acond10/bin/python --version
-
       - name: Install Cuda
         run: |
           yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
@@ -75,12 +64,28 @@ jobs:
           export CMAKE_CUDA_COMPILER=/usr/local/cuda/bin/nvcc
           export CUDNN_LIBRARY_PATH=/usr/local/cuda/lib64/ 
           export CUDNN_INCLUDE_DIR=/usr/local/cuda/include/
-
-
       - name: Install torch
         run: |
-          git clone https://github.com/pytorch/builder
-          bash builder/wheel/build_wheel.sh py38 manylinux2014_x86_64 cuda11.8 cuda11.8_dist
+          mkdir ~/github
+          cd ~/github
+          git clone --recursive https://github.com/pytorch/pytorch
+          cd pytorch
+          export CUDA_VERSION=11.8
+          export CUDACXX=/usr/local/cuda/bin/nvcc
+          export USE_ITT=0
+          export USE_KINETO=0
+          export BUILD_TEST=0
+          export USE_MPI=0
+          export BUILD_CAFFE2=0
+          export BUILD_CAFFE2_OPS=0
+          export USE_DISTRIBUTED=0
+          export MAX_JOBS=2
+          export TORCH_CUDA_ARCH_LIST="6.1;7.5;8.0;8.6"
+      - name: Build wheel
+        run: |
+          cd ~/github/pytorch  # Ensure you are in the correct directory
+          python setup.py bdist_wheel 
+          cd ..
       - name: Find Wheel Files
         run: |
           echo "PYTHON_VERSION_DASH: $PYTHON_VERSION_DASH"
@@ -102,7 +107,3 @@ jobs:
           done
         env:
           GITHUB_TOKEN: ${{ secrets.YOUR_PAT_SECRET }}
-
-
-          
-
