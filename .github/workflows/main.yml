@@ -47,9 +47,9 @@ jobs:
       #     conda install -y astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses
       #     conda install -y mkl mkl-include
       #     conda install -c pytorch magma-cuda118
-      # - name: Which Python
-      #   run: |
-      #     ~/install/acond10/bin/python --version
+      - name: Which Python
+        run: |
+          python --version
       - name: Install Cuda
         run: |
           yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo
