@@ -42,24 +42,24 @@ jobs:
       - name: Print Python-Version-Dash
         run: echo "this $PYTHON_VERSION_DASH"
 
-      - name: Install Anaconda
-        run: |
-          wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
-          bash Anaconda3-2022.10-Linux-x86_64.sh -b -p $HOME/anaconda3
-          echo "$HOME/anaconda3/bin" >> $GITHUB_PATH
-      - name: Create Conda environment
-        run: |
-          source $HOME/anaconda3/etc/profile.d/conda.sh
-          conda create -p ~/install/acond10 python=${{ matrix.python-version }} -y
-          source $HOME/anaconda3/etc/profile.d/conda.sh
-          conda activate ~/install/acond10
-          conda install -y astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses
-          conda install -y mkl mkl-include
-          conda install -c pytorch magma-cuda118
+      # - name: Install Anaconda
+      #   run: |
+      #     wget https://repo.anaconda.com/archive/Anaconda3-2022.10-Linux-x86_64.sh
+      #     bash Anaconda3-2022.10-Linux-x86_64.sh -b -p $HOME/anaconda3
+      #     echo "$HOME/anaconda3/bin" >> $GITHUB_PATH
+      # - name: Create Conda environment
+      #   run: |
+      #     source $HOME/anaconda3/etc/profile.d/conda.sh
+      #     conda create -p ~/install/acond10 python=${{ matrix.python-version }} -y
+      #     source $HOME/anaconda3/etc/profile.d/conda.sh
+      #     conda activate ~/install/acond10
+      #     conda install -y astunparse numpy ninja pyyaml setuptools cmake cffi typing_extensions future six requests dataclasses
+      #     conda install -y mkl mkl-include
+      #     conda install -c pytorch magma-cuda118
 
-      - name: Which Python
-        run: |
-          ~/install/acond10/bin/python --version
+      # - name: Which Python
+      #   run: |
+      #     ~/install/acond10/bin/python --version
 
       - name: Install Cuda
         run: |
@@ -80,7 +80,7 @@ jobs:
       - name: Install torch
         run: |
           git clone https://github.com/pytorch/builder
-          bash builder/manywheel/build_wheel.sh py38 manylinux2014_x86_64 cuda11.8 cuda11.8_dist
+          bash builder/wheel/build_wheel.sh py38 manylinux2014_x86_64 cuda11.8 cuda11.8_dist
       - name: Find Wheel Files
         run: |
           echo "PYTHON_VERSION_DASH: $PYTHON_VERSION_DASH"
